@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Expense Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="profile">
+        <img src="default.png" alt="User" />
+        <h3>UserName</h3>
+      </div>
+      <nav>
+        <a href="#" class="active">📊 Dashboard</a>
+        <a href="groups.html">💰 Groups</a>
+        <a href="friends.html">💸 Friends</a>
+        <a href="#">🚪 Logout</a>
+        <button class="new-expense-btn">➕ New Expense</button>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <header>
+        <h2>Expense Tracker</h2>
+      </header>
+
+      <section class="cards">
+        <div class="card purple">
+          <h4>Total Balance</h4>
+          <p>$</p>
+        </div>
+        <div class="card orange">
+          <h4>Total Income</h4>
+          <p>$</p>
+        </div>
+        <div class="card red">
+          <h4>Total Expenses</h4>
+          <p>$</p>
+        </div>
+      </section>
+
+      <section class="details">
+        <div class="transactions">
+          <div class="title-row">
+            <h4>Recent Transactions</h4>
+            <button>See All →</button>
+          </div>
+          <ul>
+            <li><span>🛍️ Shopping</span> <span class="expense">- $430</span></li>
+            <li><span>✈️ Travel</span> <span class="expense">- $670</span></li>
+            <li><span>💼 Salary</span> <span class="income">+ $12,000</span></li>
+            <li><span>💡 Electricity Bill</span> <span class="expense">- $200</span></li>
+            <li><span>🏠 Loan Repayment</span> <span class="expense">- $600</span></li>
+          </ul>
+        </div>
+
+        <div class="chart">
+          <h4>Financial Overview</h4>
+          <canvas id="financeChart"></canvas>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

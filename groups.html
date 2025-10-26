@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Groups | Expense Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="profile">
+        <img src="default.png" alt="User" />
+        <h3>UserName</h3>
+      </div>
+      <nav>
+        <a href="index.html">📊 Dashboard</a>
+        <a href="friends.html">🧑‍🤝‍🧑 Friends</a>
+        <a href="groups.html" class="active">👥 Groups</a>
+        <a href="#">🚪 Logout</a>
+      </nav>
+      <button class="new-expense-btn">➕ New Expense</button>
+    </aside>
+
+    <main class="main-content">
+      <header>
+        <h2>Groups</h2>
+      </header>
+
+      <section class="cards">
+        <div class="card purple">
+          <h4>Total Groups</h4>
+          <p>4</p>
+        </div>
+        <div class="card orange">
+          <h4>Total Shared Expense</h4>
+          <p>$2,300</p>
+        </div>
+      </section>
+
+      <section class="details">
+        <div class="transactions">
+          <div class="title-row">
+            <h4>Your Groups</h4>
+            <button>➕ New Group</button>
+          </div>
+          <ul>
+            <li><span>🏖️ Goa Trip</span> <span class="income">$1,200 total</span></li>
+            <li><span>🍕 Office Lunch</span> <span class="income">$320 total</span></li>
+            <li><span>🏡 Rent Split</span> <span class="income">$700 total</span></li>
+            <li><span>🎉 Birthday Party</span> <span class="income">$80 total</span></li>
+          </ul>
+        </div>
+
+        <div class="chart">
+          <h4>Group Expense Overview</h4>
+          <canvas id="groupsChart"></canvas>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('groupsChart');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Goa Trip', 'Office Lunch', 'Rent Split', 'Birthday Party'],
+        datasets: [{
+          label: 'Total Expense',
+          data: [1200, 320, 700, 80],
+          backgroundColor: '#6c63ff',
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

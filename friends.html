@@ -8,6 +8,7 @@
 </head>
 <body>
   <div class="container">
+    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile">
         <img src="default.png" alt="User" />
@@ -15,41 +16,38 @@
       </div>
       <nav>
         <a href="index.html">📊 Dashboard</a>
-        <a href="friends.html" class="active">🧑‍🤝‍🧑 Friends</a>
-        <a href="groups.html">👥 Groups</a>
+        <a href="groups.html">💰 Groups</a>
+        <a href="friends.html" class="active">💸 Friends</a>
         <a href="#">🚪 Logout</a>
       </nav>
       <button class="new-expense-btn">➕ New Expense</button>
     </aside>
 
+    <!-- Main Content -->
     <main class="main-content">
       <header>
         <h2>Friends & Balances</h2>
       </header>
 
+      <!-- Summary Cards -->
       <section class="cards">
         <div class="card purple">
           <h4>Total You Owe</h4>
-          <p>$450</p>
+          <p id="totalOwe">$0</p>
         </div>
         <div class="card orange">
           <h4>Total You’re Owed</h4>
-          <p>$300</p>
+          <p id="totalOwed">$0</p>
         </div>
       </section>
 
+      <!-- Friends List + Chart -->
       <section class="details">
         <div class="transactions">
           <div class="title-row">
             <h4>Friends List</h4>
-            <button>➕ Add Friend</button>
           </div>
-          <ul>
-            <li><span>👩‍🦰 Samit</span> <span class="expense">You owe $120</span></li>
-            <li><span>👨‍🦱 Rishab</span> <span class="income">Owes you $80</span></li>
-            <li><span>👩‍🦳 Rakshit</span> <span class="expense">You owe $230</span></li>
-            <li><span>👨‍🦰 Sambhram</span> <span class="income">Owes you $220</span></li>
-          </ul>
+          <ul id="friendsList"></ul> <!-- Dynamically populated -->
         </div>
 
         <div class="chart">
@@ -60,19 +58,7 @@
     </main>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    const ctx = document.getElementById('friendsChart');
-    new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['You Owe', 'You’re Owed'],
-        datasets: [{
-          data: [450, 300],
-          backgroundColor: ['#ff4d4d', '#6c63ff']
-        }]
-      },
-      options: {
-        plugins: { legend: { position: 'bottom' } }
-      }
-    });
+  <script src="script.js"></script>
+
+</body>
+</html>

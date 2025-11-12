@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Sign Up | Expense Tracker</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -10,22 +10,22 @@
   <div class="auth-container">
     <div class="auth-card">
       <h2>Create Account ✨</h2>
-      <p>Join us to manage your finances efficiently</p>
+      <p>Join us to manage your finances</p>
 
-      <form>
+      <form id="signupForm" novalidate>
         <div class="form-group">
           <label>Full Name</label>
-          <input type="text" placeholder="Enter your name" required />
+          <input id="fullName" name="fullName" type="text" placeholder="Enter your name" required />
         </div>
 
         <div class="form-group">
           <label>Email</label>
-          <input type="email" placeholder="Enter your email" required />
+          <input id="email" name="email" type="email" placeholder="Enter your email" required />
         </div>
 
         <div class="form-group">
           <label>Password</label>
-          <input type="password" placeholder="Create a password" required />
+          <input id="password" name="password" type="password" placeholder="Create a password" required />
         </div>
 
         <button type="submit" class="btn-primary">Sign Up</button>
@@ -34,7 +34,64 @@
       <p class="switch-auth">
         Already have an account? <a href="signin.html">Sign In</a>
       </p>
+
+      <div id="msg" style="color:crimson;margin-top:10px;"></div>
     </div>
   </div>
+
+<script>
+/*
+  Important: this uses a relative path to the API.
+  If your folder layout is:
+    htdocs/my_expenses_project/
+      signup.html
+      expenses_api/
+        register.php
+  then './expenses_api/register.php' will work.
+*/
+const API_BASE = './expenses_api'; // relative to this HTML file
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('signupForm');
+  const msg = document.getElementById('msg');
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();               // <- prevents default refresh
+    msg.textContent = '';
+
+    const fullName = document.getElementById('fullName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) {
+      msg.textContent = 'Email and password required';
+      return;
+    }
+
+    try {
+      console.log('Signing up', email);
+      const res = await fetch(`${API_BASE}/register.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: fullName, email, password })
+      });
+
+      const json = await res.json().catch(() => null);
+      console.log('register response', res.status, json);
+
+      if (!res.ok) {
+        msg.textContent = (json && json.error) ? json.error : 'Signup failed';
+        return;
+      }
+
+      // success
+      localStorage.setItem('currentUser', email);
+      window.location.href = './index.html';
+    } catch (err) {
+      console.error('Network or JS error', err);
+      msg.textContent = 'Network error — check console';
+    }
+  });
+});
+</script>
 </body>
 </html>

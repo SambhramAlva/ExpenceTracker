@@ -11,16 +11,17 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile">
-        <img src="default.png" alt="User" />
-        <h3>UserName</h3>
+        <h1>
+       <div id="userGreeting" class="user-greeting">Welcome,<br> <span id="userDisplay">Guest</span> </div></h1>
       </div>
       <nav>
         <a href="index.html">📊 Dashboard</a>
         <a href="groups.html">💰 Groups</a>
         <a href="friends.html" class="active">💸 Friends</a>
-        <a href="#">🚪 Logout</a>
+        <a href="signin.html">🚪 Logout</a>
       </nav>
       <button class="new-expense-btn">➕ New Expense</button>
+      <button id="resetExpenses" class="reset-btn">Reset Expenses</button>
     </aside>
 
     <!-- Main Content -->
@@ -58,6 +59,8 @@
     </main>
   </div>
 
+  <!-- Load Chart.js before your script so Chart is defined -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
 
 </body>

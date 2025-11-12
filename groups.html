@@ -10,16 +10,17 @@
   <div class="container">
     <aside class="sidebar">
       <div class="profile">
-        <img src="default.png" alt="User" />
-        <h3>UserName</h3>
+        <h1>
+<div id="userGreeting" class="user-greeting">Welcome,<br> <span id="userDisplay">Guest</span> </div></h1>
       </div>
       <nav>
         <a href="index.html">📊 Dashboard</a>
         <a href="groups.html" class="active">💰 Groups</a>
         <a href="friends.html">💸 Friends</a>
-        <a href="#">🚪 Logout</a>
+        <a href="signin.html">🚪 Logout</a>
       </nav>
             <button class="new-expense-btn">➕ New Expense</button>
+            <button id="resetExpenses" class="reset-btn">Reset Expenses</button>
 
     </aside>
 
@@ -135,6 +136,31 @@
 
 
 <script src="script.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const groupList = document.querySelector(".transactions ul");
+  const totalGroupsElement = document.querySelector(".card.purple p");
+
+  // Function to update the total groups count
+  function updateGroupCount() {
+    const visibleGroups = groupList.querySelectorAll("li");
+    totalGroupsElement.textContent = visibleGroups.length;
+  }
+
+  // Run once when the page loads
+  updateGroupCount();
+
+  // Automatically update the count whenever list changes
+  const observer = new MutationObserver(updateGroupCount);
+  observer.observe(groupList, { childList: true });
+
+  // Optional: If you have an "Add Group" button dynamically adding <li> items
+  // make sure it appends <li> inside this same <ul> (.transactions ul)
+});
+</script>
+
+
+
 
 </body>
 </html>

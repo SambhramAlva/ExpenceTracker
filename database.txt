@@ -1,0 +1,25 @@
+-- create DB (if not exists) and tables for the expense app
+CREATE DATABASE IF NOT EXISTS expenses_app CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE expenses_app;
+
+-- users table (email used as username, with password hash)
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(191) NOT NULL UNIQUE,
+  full_name VARCHAR(191),
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- expenses table (each row belongs to a user.email)
+CREATE TABLE IF NOT EXISTS expenses (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user VARCHAR(191) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  amount DECIMAL(12,2) NOT NULL,
+  payer VARCHAR(191) NOT NULL,
+  people TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_user (user),
+  CONSTRAINT fk_user FOREIGN KEY (user) REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;

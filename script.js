@@ -1,7 +1,3 @@
-// --- script.js (XAMPP / PHP API version) ---
-// Expects project to be served from http://localhost/my_expenses_project/
-// and API at http://localhost/expenses_api/
-
 const expenseModal = document.getElementById("expenseModal");
 const groupExpenseModal = document.getElementById("groupExpenseModal");
 const resetBtn = document.getElementById("resetExpenses");
@@ -26,31 +22,63 @@ const newGroupInput = document.getElementById("newGroupInput");
 
 let chart;
 
-// API base (served by Apache/XAMPP)
+
 const API_BASE = '/my_expenses_project/expenses_api';
 const currentUser = localStorage.getItem('currentUser') || null;
 if (!currentUser) console.warn('No currentUser in localStorage. Set localStorage.currentUser after login.');
 
-// Chart helper (uses Chart.js if included)
-function updateChart(owe, owed) {
-  const canvas = document.querySelector("canvas");
+
+// ---------- GENERIC DOUGHNUT CHART CREATOR ----------
+// ---------- CHART MANAGER (replace old updateChart) ----------
+const _charts = {}; // store instances by canvasId
+
+function makeChart(canvasId, type, labels, data, labelName = '') {
+  const canvas = document.getElementById(canvasId) || document.querySelector("canvas");
   if (!canvas) return;
-  if (!chart) {
-    chart = new Chart(canvas, {
-      type: "doughnut",
-      data: {
-        labels: ["You Owe", "You’re Owed"],
-        datasets: [{ data: [owe, owed] }]
-      },
-      options: { plugins: { legend: { position: "bottom" } } }
-    });
-  } else {
-    chart.data.datasets[0].data = [owe, owed];
-    chart.update();
+  const ctx = canvas.getContext('2d');
+
+  // destroy existing chart on this canvas
+  if (_charts[canvasId]) {
+    try { _charts[canvasId].destroy(); } catch (e) { /* ignore */ }
+    delete _charts[canvasId];
   }
+
+  _charts[canvasId] = new Chart(ctx, {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        label: labelName,
+        data,
+        backgroundColor: type === 'bar' ? labels.map(()=> '#7b6cff') : ["#ff7b7b","#7b6cff"],
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { display: type !== 'bar' }
+      },
+      scales: type === 'bar' ? {
+        x: { title: { display: true, text: 'Groups' } },
+        y: { beginAtZero: true, title: { display: true, text: 'Amount ($)' } }
+      } : {}
+    }
+  });
 }
 
-// API helpers (PHP endpoints)
+// helper convenience wrappers used below
+function updateDoughnut(canvasId, owe, owed) {
+  makeChart(canvasId, 'doughnut', ["You Owe","You're Owed"], [Number(owe)||0, Number(owed)||0]);
+}
+function updateBar(canvasId, data) {
+  makeChart(canvasId, 'bar', data.map(d=>d.title), data.map(d=>Number(d.amount)||0), 'Group Expenses');
+}
+
+
+
 async function apiGetExpenses() {
   if (!currentUser) return [];
   const res = await fetch(`${API_BASE}/get_expenses.php?user=${encodeURIComponent(currentUser)}`);
@@ -101,12 +129,35 @@ async function addExpense(title, amount, payer, people) {
 async function render() {
   const data = await apiGetExpenses();
 
-  let owe = 0, owed = 0;
-  data.forEach(e => {
-    const share = (Number(e.amount) || 0) / (e.people.length || 1);
-    if (e.payer === "You") owed += (e.people.length - 1) * share;
-    else if (e.people.includes("You")) owe += share;
-  });
+ let owe = 0, owed = 0;
+data.forEach(e => {
+  // normalize amount
+  const amt = Number(e.amount) || 0;
+
+  // normalize people array (backend might send JSON string or array)
+  let people = [];
+  if (Array.isArray(e.people)) people = e.people;
+  else if (typeof e.people === 'string' && e.people.trim()) {
+    try { people = JSON.parse(e.people); } catch (err) { people = e.people.split?.(',').map(s=>s.trim()) || []; }
+  }
+
+  const count = people.length || 1;
+  const share = amt / count;
+
+  // treat currentUser email and literal "You" as the same person
+  const payerIsYou = (e.payer === "You") || (e.payer === currentUser);
+  const youInPeople = people.includes("You") || people.includes(currentUser);
+
+  if (payerIsYou) {
+    // you paid -> others owe you (exclude you/currentUser)
+    const othersCount = people.filter(p => p !== "You" && p !== currentUser).length;
+    owed += othersCount * share;
+  } else if (youInPeople) {
+    // someone else paid and you were included -> you owe that payer
+    owe += share;
+  }
+});
+
 
   if (document.getElementById("financeChart")) {
     const purpleP = document.querySelector(".cards .purple p");
@@ -122,60 +173,106 @@ async function render() {
         list.innerHTML = data.map(e => `<li><span>💸 ${escapeHtml(e.title)}</span><span>Paid by ${escapeHtml(e.payer)} - $${Number(e.amount).toFixed(2)}</span></li>`).join("");
       }
     }
-    updateChart(owe, owed);
+   updateDoughnut('financeChart', owe, owed);
+
   }
 
-  if (document.getElementById("groupsChart")) {
-    const list = document.querySelector(".transactions ul");
-    const total = data.reduce((acc, cur) => acc + Number(cur.amount || 0), 0);
-    if (list) {
-      if (data.length === 0) list.innerHTML = `<li><span>No group expenses yet</span></li>`;
-      else list.innerHTML = data.map(e => `<li><span>💬 ${escapeHtml(e.title)}</span><span>$${Number(e.amount).toFixed(2)}</span></li>`).join("");
-    }
-    const cardOrange = document.querySelector(".card.orange p");
-    if (cardOrange) cardOrange.textContent = `$${total.toFixed(2)}`;
-    updateChart(total / 2, total / 2);
+// ---------- GROUPS PAGE (Bar Chart) ----------
+// ---------- GROUPS PAGE (Bar Chart) ----------
+if (document.getElementById("groupsChart")) {
+  const list = document.querySelector(".transactions ul");
+  const total = data.reduce((acc, cur) => acc + Number(cur.amount || 0), 0);
+
+  // Render list
+  if (list) {
+    if (data.length === 0)
+      list.innerHTML = `<li><span>No group expenses yet</span></li>`;
+    else
+      list.innerHTML = data.map(e =>
+        `<li><span>💬 ${escapeHtml(e.title)}</span><span>$${Number(e.amount).toFixed(2)}</span></li>`
+      ).join("");
   }
 
-  // FRIENDS
+  // Update total
+  const cardOrange = document.querySelector(".card.orange p");
+  if (cardOrange) cardOrange.textContent = `$${total.toFixed(2)}`;
+
+  // Draw bar chart for group expenses
+  updateBar('groupsChart', data);
+
+}
+
+// ---------- FRIENDS PAGE (Individual Balances Visualization) ----------
 if (document.getElementById("friendsChart")) {
   const listEl = document.getElementById("friendsList");
-  const balances = {}; // { friendName: amountPositiveIfTheyOweYou, negativeIfYouOweThem }
+  const balances = {};
 
+  // Calculate per-friend balances
   data.forEach(e => {
-    const share = e.amount / e.people.length;
+    // normalize
+    const amt = Number(e.amount) || 0;
+    let people = [];
 
-    if (e.payer === "You") {
-      // You paid → others owe you
-      e.people.forEach(p => {
-        if (p === "You") return;
-        balances[p] = (balances[p] || 0) + share;
+    if (Array.isArray(e.people)) people = e.people;
+    else if (typeof e.people === "string" && e.people.trim()) {
+      try { people = JSON.parse(e.people); }
+      catch { people = e.people.split(",").map(p => p.trim()); }
+    }
+
+    const share = amt / (people.length || 1);
+
+    if (e.payer === "You" || e.payer === currentUser) {
+      // You paid -> others owe you
+      people.forEach(p => {
+        if (p !== "You" && p !== currentUser)
+          balances[p] = (balances[p] || 0) + share;
       });
-    } else {
-      // Someone else paid → if You were included, you owe them
-      if (e.people.includes("You")) {
-        balances[e.payer] = (balances[e.payer] || 0) - share;
-      }
+    } else if (people.includes("You") || people.includes(currentUser)) {
+      // Someone else paid -> you owe them
+      balances[e.payer] = (balances[e.payer] || 0) - share;
     }
   });
 
-  // render the list dynamically
-  listEl.innerHTML = "";
+  // Render the list
+  if (listEl) listEl.innerHTML = "";
   let totalOwe = 0, totalOwed = 0;
 
-  for (let [friend, amount] of Object.entries(balances)) {
-    const marker = amount > 0 ? "🟢" : "🔴";
-    const text = amount > 0 ? `Owes you $${Math.abs(amount).toFixed(2)}` : `You owe $${Math.abs(amount).toFixed(2)}`;
-    listEl.innerHTML += `<li><span>${marker} ${friend}</span><span>${text}</span></li>`;
-    if (amount > 0) totalOwed += amount;
-    else totalOwe += Math.abs(amount);
+  for (const [friend, amount] of Object.entries(balances)) {
+    const li = document.createElement("li");
+    if (amount > 0) {
+      li.innerHTML = `🟢 ${friend} - Owes you $${amount.toFixed(2)}`;
+      totalOwed += amount;
+    } else if (amount < 0) {
+      li.innerHTML = `🔴 ${friend} - You owe $${Math.abs(amount).toFixed(2)}`;
+      totalOwe += Math.abs(amount);
+    } else {
+      li.innerHTML = `⚪ ${friend} - Settled`;
+    }
+    listEl.appendChild(li);
   }
 
-  document.getElementById("totalOwe").textContent = `$${totalOwe.toFixed(2)}`;
-  document.getElementById("totalOwed").textContent = `$${totalOwed.toFixed(2)}`;
+  // Update totals
+  const oweEl = document.getElementById("totalOwe");
+  const owedEl = document.getElementById("totalOwed");
+  if (oweEl) oweEl.textContent = `$${totalOwe.toFixed(2)}`;
+  if (owedEl) owedEl.textContent = `$${totalOwed.toFixed(2)}`;
 
-  updateChart(totalOwe, totalOwed);
+  // Prepare chart data for individual friends
+  const friendNames = Object.keys(balances);
+  const friendAmounts = Object.values(balances).map(a => Number(a.toFixed(2)));
+
+  // Draw bar chart per friend
+  makeChart(
+    "friendsChart",
+    "bar",
+    friendNames,
+    friendAmounts,
+    "Friend Balances ($)"
+  );
 }
+
+
+
 
 }
 
@@ -264,7 +361,7 @@ resetBtn?.addEventListener("click", async () => {
     alert("Failed to clear expenses.");
   }
 });
-// --- fetch user full name from API ---
+
 async function apiGetUser() {
   if (!currentUser) return null;
   try {
@@ -273,21 +370,21 @@ async function apiGetUser() {
       console.warn('apiGetUser failed', res.status);
       return null;
     }
-    return await res.json(); // returns { email, full_name, display }
+    return await res.json(); 
   } catch (err) {
     console.error('apiGetUser error', err);
     return null;
   }
 }
 
-// --- show user's name on index page ---
+
 async function renderUserGreeting() {
   const el = document.getElementById('userDisplay');
   if (!el) return;
 
   const user = await apiGetUser();
   if (user && user.full_name) {
-    el.textContent = user.full_name; // ✅ show full name from DB
+    el.textContent = user.full_name; 
   } else if (user && user.email) {
     el.textContent = user.email;
   } else {

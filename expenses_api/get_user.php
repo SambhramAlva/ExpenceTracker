@@ -20,7 +20,7 @@ try {
         exit();
     }
 
-    // If full_name is empty, fallback to email
+  
     $display = !empty($user['full_name']) ? $user['full_name'] : $user['email'];
 
     echo json_encode([

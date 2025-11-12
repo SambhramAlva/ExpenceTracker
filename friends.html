@@ -8,7 +8,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- Sidebar -->
+
     <aside class="sidebar">
       <div class="profile">
         <h1>
@@ -24,13 +24,13 @@
       <button id="resetExpenses" class="reset-btn">Reset Expenses</button>
     </aside>
 
-    <!-- Main Content -->
+
     <main class="main-content">
       <header>
         <h2>Friends & Balances</h2>
       </header>
 
-      <!-- Summary Cards -->
+   
       <section class="cards">
         <div class="card purple">
           <h4>Total You Owe</h4>
@@ -42,13 +42,12 @@
         </div>
       </section>
 
-      <!-- Friends List + Chart -->
       <section class="details">
         <div class="transactions">
           <div class="title-row">
             <h4>Friends List</h4>
           </div>
-          <ul id="friendsList"></ul> <!-- Dynamically populated -->
+          <ul id="friendsList"></ul>
         </div>
 
         <div class="chart">
@@ -58,8 +57,46 @@
       </section>
     </main>
   </div>
+  <div id="expenseModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Add New Expense</h3>
+      <form id="expenseForm">
+        <label>Expense Title:</label>
+        <input type="text" id="expenseTitle" placeholder="e.g. Dinner, Trip" required />
 
-  <!-- Load Chart.js before your script so Chart is defined -->
+        <label>Amount ($):</label>
+        <input type="number" id="expenseAmount" placeholder="Enter amount" required />
+
+        <label>Paid By:</label>
+        <select id="paidBy" required>
+          <option value="" disabled selected>Select payer</option>
+          <option value="You">You</option>
+          <option value="Friend 1">Friend 1</option>
+          <option value="Friend 2">Friend 2</option>
+        </select>
+
+        <label>Split Between:</label>
+        <div id="splitBetween">
+          <label><input type="checkbox" value="You" checked /> You</label>
+          <label><input type="checkbox" value="Friend 1" checked /> Friend 1</label>
+          <label><input type="checkbox" value="Friend 2" checked /> Friend 2</label>
+        </div>
+
+        <div id="splitResult" style="margin-top:10px; font-size:0.9rem; color:#555;"></div>
+
+        <select id="groupSelect"></select>
+        <input type="text" id="newGroupInput" placeholder="New group name" />
+        <button type="button" id="addGroupBtn">Add Group</button>
+
+        <div class="modal-actions">
+          <button type="submit">Add Expense</button>
+          <button type="button" id="closeModal">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
 

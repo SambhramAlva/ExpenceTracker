@@ -323,3 +323,19 @@ header h2 {
 .modal-actions button:hover {
   background-color: #5848e0;
 }
+/* ===== FIX CHART LAYOUT ===== */
+/* ======== FIX CHARTS FROM MOVING ======== */
+.chart {
+  position: relative;
+  width: 100%;
+  height: 500px; /* keeps height constant */
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box;
+}
+

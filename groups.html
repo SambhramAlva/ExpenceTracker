@@ -30,7 +30,7 @@
       </header>
       
 
-<!-- Group Expense Modal -->
+
 <div class="modal" id="groupExpenseModal">
   <div class="modal-content">
     <span class="close" id="closeGroupModal">&times;</span>
@@ -98,41 +98,45 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
- <!-- Splitwise-style Add Expense Modal -->
+ 
 <div id="expenseModal" class="modal" style="display:none;">
-  <div class="modal-content">
-    <h3>Add New Expense</h3>
-    <form id="expenseForm">
-      <label>Expense Title:</label>
-      <input type="text" id="expenseTitle" placeholder="e.g. Dinner, Trip" required />
+    <div class="modal-content">
+      <h3>Add New Expense</h3>
+      <form id="expenseForm">
+        <label>Expense Title:</label>
+        <input type="text" id="expenseTitle" placeholder="e.g. Dinner, Trip" required />
 
-      <label>Amount ($):</label>
-      <input type="number" id="expenseAmount" placeholder="Enter amount" required />
+        <label>Amount ($):</label>
+        <input type="number" id="expenseAmount" placeholder="Enter amount" required />
 
-      <label>Paid By:</label>
-      <select id="paidBy" required>
-        <option value="" disabled selected>Select payer</option>
-        <option value="You">You</option>
-        <option value="Friend 1">Friend 1</option>
-        <option value="Friend 2">Friend 2</option>
-      </select>
+        <label>Paid By:</label>
+        <select id="paidBy" required>
+          <option value="" disabled selected>Select payer</option>
+          <option value="You">You</option>
+          <option value="Friend 1">Friend 1</option>
+          <option value="Friend 2">Friend 2</option>
+        </select>
 
-      <label>Split Between:</label>
-      <div id="splitBetween">
-        <label><input type="checkbox" value="You" checked /> You</label>
-        <label><input type="checkbox" value="Friend 1" checked /> Friend 1</label>
-        <label><input type="checkbox" value="Friend 2" checked /> Friend 2</label>
-      </div>
+        <label>Split Between:</label>
+        <div id="splitBetween">
+          <label><input type="checkbox" value="You" checked /> You</label>
+          <label><input type="checkbox" value="Friend 1" checked /> Friend 1</label>
+          <label><input type="checkbox" value="Friend 2" checked /> Friend 2</label>
+        </div>
 
-      <div id="splitResult" style="margin-top:10px; font-size:0.9rem; color:#555;"></div>
+        <div id="splitResult" style="margin-top:10px; font-size:0.9rem; color:#555;"></div>
 
-      <div class="modal-actions">
-        <button type="submit">Add Expense</button>
-        <button type="button" id="closeModal">Cancel</button>
-      </div>
-    </form>
+        <select id="groupSelect"></select>
+        <input type="text" id="newGroupInput" placeholder="New group name" />
+        <button type="button" id="addGroupBtn">Add Group</button>
+
+        <div class="modal-actions">
+          <button type="submit">Add Expense</button>
+          <button type="button" id="closeModal">Close</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
 
 <script src="script.js"></script>
@@ -141,21 +145,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const groupList = document.querySelector(".transactions ul");
   const totalGroupsElement = document.querySelector(".card.purple p");
 
-  // Function to update the total groups count
+  
   function updateGroupCount() {
     const visibleGroups = groupList.querySelectorAll("li");
     totalGroupsElement.textContent = visibleGroups.length;
   }
 
-  // Run once when the page loads
+ 
   updateGroupCount();
 
-  // Automatically update the count whenever list changes
+ 
   const observer = new MutationObserver(updateGroupCount);
   observer.observe(groupList, { childList: true });
 
-  // Optional: If you have an "Add Group" button dynamically adding <li> items
-  // make sure it appends <li> inside this same <ul> (.transactions ul)
+  
 });
 </script>
 

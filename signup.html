@@ -40,22 +40,14 @@
   </div>
 
 <script>
-/*
-  Important: this uses a relative path to the API.
-  If your folder layout is:
-    htdocs/my_expenses_project/
-      signup.html
-      expenses_api/
-        register.php
-  then './expenses_api/register.php' will work.
-*/
-const API_BASE = './expenses_api'; // relative to this HTML file
+
+const API_BASE = './expenses_api'; 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('signupForm');
   const msg = document.getElementById('msg');
 
   form.addEventListener('submit', async (ev) => {
-    ev.preventDefault();               // <- prevents default refresh
+    ev.preventDefault();           
     msg.textContent = '';
 
     const fullName = document.getElementById('fullName').value.trim();
@@ -83,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // success
+
       localStorage.setItem('currentUser', email);
       window.location.href = './index.html';
     } catch (err) {

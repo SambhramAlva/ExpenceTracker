@@ -14,7 +14,6 @@ try {
     $stmt = $pdo->prepare("SELECT id, user, title, amount, payer, people, created_at FROM expenses WHERE user = :u ORDER BY id DESC");
     $stmt->execute(['u' => $user]);
     $rows = $stmt->fetchAll();
-    // decode people JSON string
     foreach ($rows as &$r) {
         $r['people'] = json_decode($r['people'], true) ?? [];
     }

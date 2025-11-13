@@ -28,18 +28,17 @@ const currentUser = localStorage.getItem('currentUser') || null;
 if (!currentUser) console.warn('No currentUser in localStorage. Set localStorage.currentUser after login.');
 
 
-// ---------- GENERIC DOUGHNUT CHART CREATOR ----------
-// ---------- CHART MANAGER (replace old updateChart) ----------
-const _charts = {}; // store instances by canvasId
+
+const _charts = {}; 
 
 function makeChart(canvasId, type, labels, data, labelName = '') {
   const canvas = document.getElementById(canvasId) || document.querySelector("canvas");
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  // destroy existing chart on this canvas
+ 
   if (_charts[canvasId]) {
-    try { _charts[canvasId].destroy(); } catch (e) { /* ignore */ }
+    try { _charts[canvasId].destroy(); } catch (e) {  }
     delete _charts[canvasId];
   }
 
@@ -69,7 +68,7 @@ function makeChart(canvasId, type, labels, data, labelName = '') {
   });
 }
 
-// helper convenience wrappers used below
+
 function updateDoughnut(canvasId, owe, owed) {
   makeChart(canvasId, 'doughnut', ["You Owe","You're Owed"], [Number(owe)||0, Number(owed)||0]);
 }
@@ -131,10 +130,9 @@ async function render() {
 
  let owe = 0, owed = 0;
 data.forEach(e => {
-  // normalize amount
+  
   const amt = Number(e.amount) || 0;
 
-  // normalize people array (backend might send JSON string or array)
   let people = [];
   if (Array.isArray(e.people)) people = e.people;
   else if (typeof e.people === 'string' && e.people.trim()) {
@@ -144,16 +142,16 @@ data.forEach(e => {
   const count = people.length || 1;
   const share = amt / count;
 
-  // treat currentUser email and literal "You" as the same person
+ 
   const payerIsYou = (e.payer === "You") || (e.payer === currentUser);
   const youInPeople = people.includes("You") || people.includes(currentUser);
 
   if (payerIsYou) {
-    // you paid -> others owe you (exclude you/currentUser)
+   
     const othersCount = people.filter(p => p !== "You" && p !== currentUser).length;
     owed += othersCount * share;
   } else if (youInPeople) {
-    // someone else paid and you were included -> you owe that payer
+   
     owe += share;
   }
 });
@@ -177,13 +175,12 @@ data.forEach(e => {
 
   }
 
-// ---------- GROUPS PAGE (Bar Chart) ----------
-// ---------- GROUPS PAGE (Bar Chart) ----------
+
 if (document.getElementById("groupsChart")) {
   const list = document.querySelector(".transactions ul");
   const total = data.reduce((acc, cur) => acc + Number(cur.amount || 0), 0);
 
-  // Render list
+
   if (list) {
     if (data.length === 0)
       list.innerHTML = `<li><span>No group expenses yet</span></li>`;
@@ -193,23 +190,22 @@ if (document.getElementById("groupsChart")) {
       ).join("");
   }
 
-  // Update total
+
   const cardOrange = document.querySelector(".card.orange p");
   if (cardOrange) cardOrange.textContent = `$${total.toFixed(2)}`;
 
-  // Draw bar chart for group expenses
+ 
   updateBar('groupsChart', data);
 
 }
 
-// ---------- FRIENDS PAGE (Individual Balances Visualization) ----------
+
 if (document.getElementById("friendsChart")) {
   const listEl = document.getElementById("friendsList");
   const balances = {};
 
-  // Calculate per-friend balances
+
   data.forEach(e => {
-    // normalize
     const amt = Number(e.amount) || 0;
     let people = [];
 
@@ -222,18 +218,17 @@ if (document.getElementById("friendsChart")) {
     const share = amt / (people.length || 1);
 
     if (e.payer === "You" || e.payer === currentUser) {
-      // You paid -> others owe you
       people.forEach(p => {
         if (p !== "You" && p !== currentUser)
           balances[p] = (balances[p] || 0) + share;
       });
     } else if (people.includes("You") || people.includes(currentUser)) {
-      // Someone else paid -> you owe them
+
       balances[e.payer] = (balances[e.payer] || 0) - share;
     }
   });
 
-  // Render the list
+
   if (listEl) listEl.innerHTML = "";
   let totalOwe = 0, totalOwed = 0;
 
@@ -251,17 +246,17 @@ if (document.getElementById("friendsChart")) {
     listEl.appendChild(li);
   }
 
-  // Update totals
+
   const oweEl = document.getElementById("totalOwe");
   const owedEl = document.getElementById("totalOwed");
   if (oweEl) oweEl.textContent = `$${totalOwe.toFixed(2)}`;
   if (owedEl) owedEl.textContent = `$${totalOwed.toFixed(2)}`;
 
-  // Prepare chart data for individual friends
+
   const friendNames = Object.keys(balances);
   const friendAmounts = Object.values(balances).map(a => Number(a.toFixed(2)));
 
-  // Draw bar chart per friend
+  
   makeChart(
     "friendsChart",
     "bar",
@@ -270,10 +265,6 @@ if (document.getElementById("friendsChart")) {
     "Friend Balances ($)"
   );
 }
-
-
-
-
 }
 
 function escapeHtml(str) {
